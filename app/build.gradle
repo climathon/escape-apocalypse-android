@@ -54,3 +54,9 @@ dependencies {
 }
 
 apply plugin: 'com.google.ar.sceneform.plugin'
+
+
+sceneform.asset('sampledata/earth/earth.obj',
+        'default',
+        'sampledata/earth/earth.sfa',
+        'src/main/res/raw/earth')

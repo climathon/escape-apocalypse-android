@@ -1,0 +1,34 @@
+{
+  materials: [
+    {
+      name: 'Material.005',
+      parameters: [
+        {
+          baseColor: 'earth',
+          fucked: 'fucked',
+        },
+      ],
+      source: 'sampledata/earth/earth.mat',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'TexCoord',
+      'Orientation',
+    ],
+    collision: {},
+    file: 'sampledata/earth/earth.obj',
+    name: 'earth',
+    recenter: 'root',
+    scale: 0.058071999999999999,
+  },
+  samplers: [
+    {
+      file: 'sampledata/earth/earth.jpg',
+      name: 'earth',
+      pipeline_name: 'earth.jpg',
+    },
+  ],
+  version: '0.54:2',
+}

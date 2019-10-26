@@ -25,32 +25,25 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Display;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.Toast;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.TrackingState;
-import com.google.ar.sceneform.FrameTime;
-import com.google.ar.sceneform.HitTestResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.Frame;
-import com.google.ar.core.Pose;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
 import com.google.ar.sceneform.Node;
-import com.google.ar.sceneform.Scene;
-import com.google.ar.sceneform.collision.Ray;
 import com.google.ar.sceneform.math.Vector3;
-import com.google.ar.sceneform.rendering.Color;
-import com.google.ar.sceneform.rendering.MaterialFactory;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
 * This is an example activity that uses the Sceneform UX package to make common AR tasks easier.
@@ -58,6 +51,27 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 	public class SceneNotValid extends RuntimeException{};
+	class FuckedUpInterpolation extends TimerTask
+	{
+		long start, end, length;
+		public FuckedUpInterpolation(long length) {
+			this.length = length;
+		}
+
+		@Override
+		public void run() {
+			long current = new Date().getTime();
+			if (start == 0) {
+				start = current;
+				end = start + length;
+			}
+			setFucked((current - start) / (float)(end - start));
+			if (current > end) {
+				Log.w(TAG, "finished setFucked Timer");
+				this.cancel();
+			}
+		}
+	}
 
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private static final double MIN_OPENGL_VERSION = 3.0;
@@ -65,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
 	
 	private ArFragment arFragment;
 	private ModelRenderable earthRenderable;
-	private ModelRenderable andyRenderable;
 	
 	@Override
 	@SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
@@ -87,9 +100,10 @@ public class MainActivity extends AppCompatActivity {
 			.setSource(this, R.raw.earth)
 			.build()
 			.thenAccept(renderable -> earthRenderable = renderable)
+			.thenRun(() -> setFucked(0.f))
 			.thenRun(() -> spawnAREarth());
 
-		arFragment.setOnTapArPlaneListener((HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
+/*		arFragment.setOnTapArPlaneListener((HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
 			if (andyRenderable == null || hitResult == null) {
 				return;
 			}
@@ -106,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
 			andy.setParent(anchorNode);
 			andy.setRenderable(andyRenderable);
 			andy.select();
-		});
+		});*/
 	}
 	
 	private Point getScreenCenter() {
@@ -117,6 +131,11 @@ public class MainActivity extends AppCompatActivity {
 		int w = arFragment.getView().getWidth()/2;
 		int h = arFragment.getView().getHeight()/2;
 		return new android.graphics.Point(w, h);
+	}
+
+	public void setFucked(float fucked) {
+		Log.d(TAG, "set fucked: " + fucked);
+		earthRenderable.getMaterial().setFloat("fucked", Math.min(fucked, 1.f));
 	}
 	
 	public void spawnAREarth() {
@@ -156,13 +175,9 @@ public class MainActivity extends AppCompatActivity {
 			earth.setParent(earthNode);
 			earth.setRenderable(earthRenderable);
 			earth.select();
-			MaterialFactory.makeOpaqueWithColor(this, new Color(android.graphics.Color.RED))
-				.thenAccept(material -> {
-					earthRenderable.setMaterial(material);
-				}
-			);
 
 			placedEarth = true;
+			new Timer().scheduleAtFixedRate(new FuckedUpInterpolation(10000), 2000, 50);
 		} catch (Exception e) {
 			final Handler handler = new Handler();
 			handler.postDelayed(() -> spawnAREarth(), 500);
