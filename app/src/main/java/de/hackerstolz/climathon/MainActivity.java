@@ -13,11 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package com.google.ar.sceneform.samples.hellosceneform;
+package de.hackerstolz.climathon;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -26,6 +27,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.webkit.WebView;
 import android.widget.Toast;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
@@ -44,6 +46,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import de.hackerstolz.climathon.WebViewController;
 
 /**
 * This is an example activity that uses the Sceneform UX package to make common AR tasks easier.
@@ -78,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
 	private static boolean placedEarth = false;
 	
 	private ArFragment arFragment;
+	private WebView webView;
 	private ModelRenderable earthRenderable;
 	
 	@Override
@@ -90,10 +95,22 @@ public class MainActivity extends AppCompatActivity {
 		if (!checkIsSupportedDeviceOrFinish(this)) {
 			return;
 		}
-		
 		setContentView(R.layout.activity_ux);
+		setupWebView();
+		setupAR();
+	}
+
+	private void setupWebView() {
+		webView = (WebView)findViewById(R.id.webview);
+		webView.setBackgroundColor(Color.TRANSPARENT);
+		webView.setWebViewClient(new WebViewController());
+		webView.getSettings().setJavaScriptEnabled(true);
+		webView.loadUrl("http://www.google.com");
+	}
+
+	private void setupAR() {
 		arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
-		
+
 		// When you build a Renderable, Sceneform loads its resources in the background while returning
 		// a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
 		ModelRenderable.builder()

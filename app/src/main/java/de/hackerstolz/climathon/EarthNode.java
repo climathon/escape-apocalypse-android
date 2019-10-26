@@ -1,10 +1,9 @@
-package com.google.ar.sceneform.samples.hellosceneform;
+package de.hackerstolz.climathon;
 
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Quaternion;
 import com.google.ar.sceneform.math.Vector3;
-import com.google.ar.sceneform.ux.TransformableNode;
 
 public class EarthNode extends Node {
     @Override
