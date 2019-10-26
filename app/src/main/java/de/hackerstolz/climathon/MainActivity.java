@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.animation.AlphaAnimation;
 import android.webkit.WebView;
 import android.widget.Toast;
 import com.google.ar.core.Anchor;
@@ -73,6 +74,10 @@ public class MainActivity extends AppCompatActivity {
 			if (current > end) {
 				Log.w(TAG, "finished setFucked Timer");
 				this.cancel();
+
+				MainActivity.this.runOnUiThread(() -> {
+					webView.animate().alpha(1.0f).setDuration(400).setListener(null);
+				});
 			}
 		}
 	}
@@ -105,7 +110,8 @@ public class MainActivity extends AppCompatActivity {
 		webView.setBackgroundColor(Color.TRANSPARENT);
 		webView.setWebViewClient(new WebViewController());
 		webView.getSettings().setJavaScriptEnabled(true);
-		webView.loadUrl("http://www.google.com");
+		webView.setAlpha(0.f);
+		navigateTo("start");
 	}
 
 	private void setupAR() {
@@ -119,25 +125,10 @@ public class MainActivity extends AppCompatActivity {
 			.thenAccept(renderable -> earthRenderable = renderable)
 			.thenRun(() -> setFucked(0.f))
 			.thenRun(() -> spawnAREarth());
+	}
 
-/*		arFragment.setOnTapArPlaneListener((HitResult hitResult, Plane plane, MotionEvent motionEvent) -> {
-			if (andyRenderable == null || hitResult == null) {
-				return;
-			}
-
-			Log.w(TAG, "spawning andy");
-
-			// Create the Anchor.
-			Anchor anchor = hitResult.createAnchor();
-			AnchorNode anchorNode = new AnchorNode(anchor);
-			anchorNode.setParent(arFragment.getArSceneView().getScene());
-
-			// Create the transformable andy and add it to the anchor.
-			TransformableNode andy = new TransformableNode(arFragment.getTransformationSystem());
-			andy.setParent(anchorNode);
-			andy.setRenderable(andyRenderable);
-			andy.select();
-		});*/
+	private void navigateTo(String path) {
+		webView.loadUrl("http://escape-apocalypse.s3-website.eu-central-1.amazonaws.com/" + path);
 	}
 	
 	private Point getScreenCenter() {

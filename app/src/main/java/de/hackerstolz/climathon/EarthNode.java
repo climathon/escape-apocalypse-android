@@ -8,7 +8,7 @@ import com.google.ar.sceneform.math.Vector3;
 public class EarthNode extends Node {
     @Override
     public void onUpdate(FrameTime frameTime) {
-        setLocalRotation(Quaternion.axisAngle(Vector3.up(), (10.f * frameTime.getStartSeconds()) % 360));
+        setLocalRotation(Quaternion.axisAngle(Vector3.up(), (5.f * frameTime.getStartSeconds()) % 360));
     }
 
 }

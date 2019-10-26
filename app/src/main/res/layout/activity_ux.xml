@@ -24,27 +24,11 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent" />
 
-  <LinearLayout
+  <WebView
+      android:id="@+id/webview"
       android:layout_width="fill_parent"
       android:layout_height="fill_parent"
-      android:orientation="vertical"
-      android:layout_gravity="bottom"
-      android:weightSum="100">
-    <View
-        android:id="@+id/fillview"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="62"
-        android:orientation="horizontal"
-        android:tileMode="repeat"/>
-
-    <WebView
-        android:id="@+id/webview"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="38"
-        android:orientation="horizontal"
-        android:tileMode="repeat"/>
-  </LinearLayout>
+      android:orientation="horizontal"
+      android:tileMode="repeat"/>
 
 </FrameLayout>

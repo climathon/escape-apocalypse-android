@@ -34,6 +34,14 @@ fragment {
             color = fucked * vec4(0.5f, 0.4f, 0.1f, 1.f) + (1.f - fucked) * color;
         }
         color -= 0.6f * fucked * color;
+
+        color += 0.03f * fucked * vec4(1.f, 0.f, 0.f, 0.f);
         material.baseColor = vec4(color.rgb, 1.f);
+    }
+}
+
+vertex {
+    void materialVertex(inout MaterialVertexInputs material) {
+        //material.worldPosition = vec4(0.f);
     }
 }
