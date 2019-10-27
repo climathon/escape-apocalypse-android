@@ -60,3 +60,29 @@ sceneform.asset('sampledata/earth/earth.obj',
         'default',
         'sampledata/earth/earth.sfa',
         'src/main/res/raw/earth')
+
+sceneform.asset('sampledata/garbage/garbage.gltf',
+        'default',
+        'sampledata/garbage/garbage.sfa',
+        'src/main/res/raw/garbage')
+
+sceneform.asset('sampledata/waterbottle/model.gltf',
+        'default',
+        'sampledata/waterbottle/model.sfa',
+        'src/main/res/raw/model')
+
+
+sceneform.asset('sampledata/cola/cola.gltf',
+        'default',
+        'sampledata/cola/cola.sfa',
+        'src/main/res/raw/cola')
+
+sceneform.asset('sampledata/sneakers/sneakers.gltf',
+        'default',
+        'sampledata/sneakers/sneakers.sfa',
+        'src/main/res/raw/sneakers')
+
+sceneform.asset('sampledata/cup/cup.gltf',
+        'default',
+        'sampledata/cup/cup.sfa',
+        'src/main/res/raw/cup')

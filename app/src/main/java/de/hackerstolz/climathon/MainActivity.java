@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 	public static final String TAG = MainActivity.class.getSimpleName();
 	private static final double MIN_OPENGL_VERSION = 3.0;
 	
-	private ArFragment arFragment;
+	private HorizontalArFragment arFragment;
 	private WebView webView;
 	private ModelRenderable earthRenderable;
 	private AnchorNode worldAnchorNode;
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void setupAR() {
-		arFragment = (ArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
+		arFragment = (HorizontalArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
 
 		// When you build a Renderable, Sceneform loads its resources in the background while returning
 		// a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
