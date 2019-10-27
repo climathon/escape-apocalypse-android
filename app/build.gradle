@@ -86,3 +86,9 @@ sceneform.asset('sampledata/cup/cup.gltf',
         'default',
         'sampledata/cup/cup.sfa',
         'src/main/res/raw/cup')
+
+
+sceneform.asset('sampledata/lipstick/lipstick.obj',
+        'default',
+        'sampledata/lipstick/lipstick.sfa',
+        'src/main/res/raw/lipstick')

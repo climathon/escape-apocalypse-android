@@ -38,6 +38,7 @@ import com.google.ar.sceneform.Camera;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
+import com.google.ar.sceneform.rendering.Renderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 
@@ -82,11 +83,19 @@ public class MainActivity extends AppCompatActivity {
 
 	public static final String TAG = MainActivity.class.getSimpleName();
 	private static final double MIN_OPENGL_VERSION = 3.0;
+
+	private WebView webView;
 	
 	private HorizontalArFragment arFragment;
-	private WebView webView;
-	private ModelRenderable earthRenderable;
 	private AnchorNode worldAnchorNode;
+
+	private ModelRenderable earthRenderable;
+	private ModelRenderable colaRenderable;
+	private ModelRenderable lipstickRenderable;
+	private ModelRenderable cupRenderable;
+	private ModelRenderable garbageRenderable;
+	private ModelRenderable sneakersRenderable;
+	private ModelRenderable waterRenderable;
 	
 	@Override
 	@SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
@@ -115,14 +124,38 @@ public class MainActivity extends AppCompatActivity {
 	private void setupAR() {
 		arFragment = (HorizontalArFragment) getSupportFragmentManager().findFragmentById(R.id.ux_fragment);
 
-		// When you build a Renderable, Sceneform loads its resources in the background while returning
-		// a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
 		ModelRenderable.builder()
 			.setSource(this, R.raw.earth)
 			.build()
 			.thenAccept(renderable -> earthRenderable = renderable)
 			.thenRun(() -> setFucked(0.f))
 			.thenRun(() -> spawnAREarth());
+
+		ModelRenderable.builder()
+				.setSource(this, R.raw.cola)
+				.build()
+				.thenAccept(renderable -> colaRenderable = renderable);
+		ModelRenderable.builder()
+				.setSource(this, R.raw.lipstick)
+				.build()
+				.thenAccept(renderable -> lipstickRenderable = renderable);
+		ModelRenderable.builder()
+				.setSource(this, R.raw.cup)
+				.build()
+				.thenAccept(renderable -> cupRenderable = renderable);
+
+		ModelRenderable.builder()
+				.setSource(this, R.raw.garbage)
+				.build()
+				.thenAccept(renderable -> garbageRenderable = renderable);
+		ModelRenderable.builder()
+				.setSource(this, R.raw.sneakers)
+				.build()
+				.thenAccept(renderable -> sneakersRenderable = renderable);
+		ModelRenderable.builder()
+				.setSource(this, R.raw.model)
+				.build()
+				.thenAccept(renderable -> waterRenderable = renderable);
 	}
 
 	private void navigateTo(String path) {
@@ -144,8 +177,60 @@ public class MainActivity extends AppCompatActivity {
 		earthRenderable.getMaterial().setFloat("fucked", Math.min(fucked, 1.f));
 	}
 
-	public void plasticScene() {
+	private AnchorNode anchorNodeForScreenCenter() {
+		ArSceneView sceneView = arFragment.getArSceneView();
+		Frame frame = sceneView.getArFrame();
+		if (frame == null) {
+			Log.w(TAG, "frame null");
+			return null;
+		}
 
+		Point center = getScreenCenter();
+		List<HitResult> hitTest = frame.hitTest(center.x, center.y);
+		if (hitTest.size() <= 0) {
+			Log.w(TAG, "hit result null");
+			return null;
+		}
+		HitResult hitTestResult = hitTest.get(0);
+
+		Log.w(TAG, "spawning earth");
+		// Create the Sceneform AnchorNode
+		Anchor anchor = hitTestResult.createAnchor();
+		return new AnchorNode(anchor);
+	}
+
+	private void placeItemInLine(AnchorNode anchorNode, Renderable renderable, float leftOffset, float scale) {
+		Camera cam = arFragment.getArSceneView().getScene().getCamera();
+		Node item = new Node();
+		item.setParent(anchorNode);
+		item.setRenderable(renderable);
+		item.setLocalScale(Vector3.one().scaled(scale));
+		item.setLocalPosition(cam.getRight().scaled(leftOffset));
+	}
+
+	public void plasticScene() {
+		try {
+		AnchorNode anchorNode = anchorNodeForScreenCenter();
+		if (anchorNode == null) {
+			throw new SceneNotValid();
+		}
+		anchorNode.setParent(arFragment.getArSceneView().getScene());
+
+		// Water
+		placeItemInLine(anchorNode, waterRenderable, 0.f, 0.4f);
+
+		placeItemInLine(anchorNode, lipstickRenderable, 1.f, 1f);
+		placeItemInLine(anchorNode, cupRenderable, 1.28f, 0.14f);
+		placeItemInLine(anchorNode, sneakersRenderable, 1.6f, 0.21f);
+
+		placeItemInLine(anchorNode, colaRenderable, 2.6f, 0.2f);
+
+		// Cola
+		} catch (Exception e) {
+			final Handler handler = new Handler();
+			handler.postDelayed(() -> plasticScene(), 500);
+			Log.w(TAG, "rerunning plasticScene in 500");
+		}
 	}
 	
 	public void spawnAREarth() {
@@ -154,25 +239,11 @@ public class MainActivity extends AppCompatActivity {
 				Log.w(TAG, "not tracking");
 				throw new SceneNotValid();
 			}
-			ArSceneView sceneView = arFragment.getArSceneView();
-			Frame frame = sceneView.getArFrame();
-			if (frame == null) {
-				Log.w(TAG, "frame null");
+
+			worldAnchorNode = anchorNodeForScreenCenter();
+			if (worldAnchorNode == null) {
 				throw new SceneNotValid();
 			}
-
-			Point center = getScreenCenter();
-			List<HitResult> hitTest = frame.hitTest(center.x, center.y);
-			if (hitTest.size() <= 0) {
-				Log.w(TAG, "hit result null");
-				throw new SceneNotValid();
-			}
-			HitResult hitTestResult = hitTest.get(0);
-
-			Log.w(TAG, "spawning earth");
-			// Create the Sceneform AnchorNode
-			Anchor anchor = hitTestResult.createAnchor();
-			worldAnchorNode = new AnchorNode(anchor);
 			worldAnchorNode.setParent(arFragment.getArSceneView().getScene());
 			
 			// Create the node relative to the AnchorNode
@@ -183,7 +254,6 @@ public class MainActivity extends AppCompatActivity {
 			TransformableNode earth = new TransformableNode(arFragment.getTransformationSystem());
 			earth.setParent(earthNode);
 			earth.setRenderable(earthRenderable);
-			earth.select();
 			new Timer().scheduleAtFixedRate(new FuckedUpInterpolation(10000), 2000, 50);
 		} catch (Exception e) {
 			final Handler handler = new Handler();
