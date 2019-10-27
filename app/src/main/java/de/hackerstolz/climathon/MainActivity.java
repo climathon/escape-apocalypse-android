@@ -26,17 +26,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.animation.AlphaAnimation;
 import android.webkit.WebView;
 import android.widget.Toast;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.TrackingState;
-import com.google.ar.core.Plane;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.ArSceneView;
+import com.google.ar.sceneform.Camera;
 import com.google.ar.sceneform.Node;
 import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
@@ -82,13 +80,13 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
-	private static final String TAG = MainActivity.class.getSimpleName();
+	public static final String TAG = MainActivity.class.getSimpleName();
 	private static final double MIN_OPENGL_VERSION = 3.0;
-	private static boolean placedEarth = false;
 	
 	private ArFragment arFragment;
 	private WebView webView;
 	private ModelRenderable earthRenderable;
+	private AnchorNode worldAnchorNode;
 	
 	@Override
 	@SuppressWarnings({"AndroidApiChecker", "FutureReturnValueIgnored"})
@@ -108,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
 	private void setupWebView() {
 		webView = (WebView)findViewById(R.id.webview);
 		webView.setBackgroundColor(Color.TRANSPARENT);
-		webView.setWebViewClient(new WebViewController());
+		webView.setWebViewClient(new WebViewController(this));
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.setAlpha(0.f);
 		navigateTo("start");
@@ -145,6 +143,10 @@ public class MainActivity extends AppCompatActivity {
 		Log.d(TAG, "set fucked: " + fucked);
 		earthRenderable.getMaterial().setFloat("fucked", Math.min(fucked, 1.f));
 	}
+
+	public void plasticScene() {
+
+	}
 	
 	public void spawnAREarth() {
 		try {
@@ -170,21 +172,18 @@ public class MainActivity extends AppCompatActivity {
 			Log.w(TAG, "spawning earth");
 			// Create the Sceneform AnchorNode
 			Anchor anchor = hitTestResult.createAnchor();
-			AnchorNode anchorNode = new AnchorNode(anchor);
-			anchorNode.setParent(arFragment.getArSceneView().getScene());
+			worldAnchorNode = new AnchorNode(anchor);
+			worldAnchorNode.setParent(arFragment.getArSceneView().getScene());
 			
 			// Create the node relative to the AnchorNode
 			EarthNode earthNode = new EarthNode();
-			earthNode.setParent(anchorNode);
-			earthNode.setLocalPosition(Vector3.up().scaled(0.8f));
+			earthNode.setParent(worldAnchorNode);
 			
 			// Create the transformable andy and add it to the anchor.
 			TransformableNode earth = new TransformableNode(arFragment.getTransformationSystem());
 			earth.setParent(earthNode);
 			earth.setRenderable(earthRenderable);
 			earth.select();
-
-			placedEarth = true;
 			new Timer().scheduleAtFixedRate(new FuckedUpInterpolation(10000), 2000, 50);
 		} catch (Exception e) {
 			final Handler handler = new Handler();
@@ -193,10 +192,17 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
-	public void makeEarthScreenSpace() {
+	public void spawnScreenSpaceEarth() {
+		Camera camera = arFragment.getArSceneView().getScene().getCamera();
+
+		arFragment.getArSceneView().getScene().removeChild(worldAnchorNode);
 		Node node = new Node();
-		node.setParent(arFragment.getArSceneView().getScene());
+		node.setParent(camera);
+		node.setLocalScale(new Vector3(0.1f, 0.1f, 0.1f));
+		Vector3 pos = new Vector3(-0.15f, 0.3f ,-0.7f);
+		node.setLocalPosition(pos);
 		node.setRenderable(earthRenderable);
+		earthRenderable.setShadowCaster(false);
 	}
 	
 	/**
